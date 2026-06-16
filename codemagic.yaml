@@ -1,0 +1,55 @@
+workflows:
+  # WORKFLOW 1: Build APK Debug (Unsigned) - For testing
+  android-debug:
+    name: Android Debug APK (Unsigned)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build debug APK
+        script: flutter build apk --debug
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - gideon@example.com
+        notify:
+          success: true
+          failure: true
+
+  # WORKFLOW 2: Build APK Release (Auto-signed by Codemagic)
+  android-release:
+    name: Android Release APK (Signed)
+    max_build_duration: 60
+    instance_type: mac_mini_m2
+    environment:
+      flutter: stable
+      # Codemagic will auto-generate keystore if not provided
+      # Or use your uploaded keystore
+    scripts:
+      - name: Set up local.properties
+        script: |
+          echo "flutter.sdk=$HOME/programs/flutter" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Get Flutter packages
+        script: flutter pub get
+      - name: Build release APK
+        script: flutter build apk --release
+    artifacts:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+      - flutter_drive.log
+    publishing:
+      email:
+        recipients:
+          - gideon@example.com
+        notify:
+          success: true
+          failure: true
